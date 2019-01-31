@@ -6,20 +6,27 @@ endif
 let g:loaded_vim_tag = 1
 
 function! s:getCword()
-  return expand("<cword>")
+  echom expand("<cfile>")
+  return expand("<cfile>")
 endfunction
 
 function! s:makeTag(type)
   let tagName = s:getCword()
+  let line = getline('.')
+  let cursor = getcurpos()
+  let row = cursor[1]
+  let column = cursor[2]
+  let left = line[:column-1]
+  let right = line[column:]
+  let left = substitute(left, tagName."$", "", "")
   if a:type != 'single'
-    let tag = '<'.tagName.'>'.'</'.tagName.'>'
-    execute 'normal! ciw'.tag
-    execute 'silent! normal T>'
+    let left .= '<'.tagName.'>'
+    let right = '</'.tagName.'>'.right
   else
-    let tag = '<'.tagName.'/>'
-    execute 'normal! ciw'.tag
-    execute 'silent! normal h'
+    let left .= '<'.tagName.'/>'
   endif
+  call setline(row, left.right) 
+  call cursor(row, len(left)+1)
   startinsert
 endfunction
 
